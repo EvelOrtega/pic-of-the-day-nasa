@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Imagem do dia Nasa!</title>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <h1>Escolha uma data!</h1>
+    <div id="app"></div>
+    <form action="#">
+      <input id="date" type="date" value="2022-04-12" onchange="pegaImagem()" />
+    </form>
+  </body>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: black;
+    }
+    canvas {
+      position: relative;
+      display: block;
+      z-index: 0;
+    }
+    h1 {
+      text-align: center;
+
+      color: #ffffff;
+
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #49ff18,
+        0 0 30px #49ff18, 0 0 40px #49ff18, 0 0 55px #49ff18, 0 0 75px #49ff18;
+    }
+    h1,
+    #app,
+    #app img {
+      max-width: 100vw;
+      max-height: 80vh;
+      margin-left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      position: fixed;
+      top: 30px;
+      margin-bottom: 30px;
+    }
+    #app img {
+      top: 50px;
+      -webkit-box-shadow: 0px 20px 0px -10px #ffffff,
+        0px -20px 0px -10px #ffffff, 20px 0px 0px -10px #ffffff,
+        -20px 0px 0px -10px #ffffff, 0px 0px 0px 10px #49ff18,
+        5px 5px 15px 5px rgba(0, 0, 0, 0);
+      box-shadow: 0px 20px 0px -10px #ffffff, 0px -20px 0px -10px #ffffff,
+        20px 0px 0px -10px #ffffff, -20px 0px 0px -10px #ffffff,
+        0px 0px 0px 10px #49ff18, 5px 5px 15px 5px rgba(0, 0, 0, 0);
+    }
+    #date {
+      height: 50px;
+      max-width: 100vw;
+      margin-left: 50%;
+      transform: translateX(-50%);
+      font-size: 30px;
+      border: none;
+      z-index: 10;
+      position: fixed;
+      bottom: 10px;
+      color: #49ff18;
+      background-color: none;
+    }
+  </style>
+  <script>
+    const data = document.getElementById("date");
+    const app = document.getElementById("app");
+    const nasaAPIKey = "uiiF3DkAL4GXrVu9sW87aW7bbkKYgaesFkKmieTQ";
+
+    //fetching
+    function pegaImagem() {
+      fetch(
+        "https://api.nasa.gov/planetary/apod?date=" +
+          data.value +
+          "&api_key=" +
+          nasaAPIKey
+      )
+        .then((response) => response.json())
+        .then((json) => {
+          app.innerHTML = ` <img src="${json.url}" />`;
+        });
+    }
+
+    //animação
+    // geting canvas by Boujjou Achraf
+    var c = document.getElementById("c");
+    var ctx = c.getContext("2d");
+
+    //making the canvas full screen
+    c.height = window.innerHeight;
+    c.width = window.innerWidth;
+
+    //chinese characters - taken from the unicode charset
+    var matrix =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+    //converting the string into an array of single characters
+    matrix = matrix.split("");
+
+    var font_size = 10;
+    var columns = c.width / font_size; //number of columns for the rain
+    //an array of drops - one per column
+    var drops = [];
+    //x below is the x coordinate
+    //1 = y co-ordinate of the drop(same for every drop initially)
+    for (var x = 0; x < columns; x++) drops[x] = 1;
+
+    //drawing the characters
+    function draw() {
+      //Black BG for the canvas
+      //translucent BG to show trail
+      ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+      ctx.fillRect(0, 0, c.width, c.height);
+
+      ctx.fillStyle = "#49ff18"; //green text
+      ctx.font = font_size + "px arial";
+      //looping over drops
+      for (var i = 0; i < drops.length; i++) {
+        //a random chinese character to print
+        var text = matrix[Math.floor(Math.random() * matrix.length)];
+        //x = i*font_size, y = value of drops[i]*font_size
+        ctx.fillText(text, i * font_size, drops[i] * font_size);
+
+        //sending the drop back to the top randomly after it has crossed the screen
+        //adding a randomness to the reset to make the drops scattered on the Y axis
+        if (drops[i] * font_size > c.height && Math.random() > 0.975)
+          drops[i] = 0;
+
+        //incrementing Y coordinate
+        drops[i]++;
+      }
+    }
+
+    setInterval(draw, 35);
+  </script>
+</html>
